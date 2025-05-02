@@ -1,0 +1,206 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{tikz-uml}
+\usepackage[margin=1in]{geometry}
+
+\title{Project Calculator\\
+\large Arbitrary precision arithmetic Library}
+
+\date{May 2025}
+
+\begin{document}
+
+\maketitle
+\section*{Directory Structure}
+\begin{verbatim}
+project_java/
+├── build.xml
+├── src/
+│   ├── arbitraryarithmetic/
+│   │    ├── AInteger.java
+│   │    ├── AFloat.java
+│   └── MyInfArith.java
+├── dist/  aarithmetic.jar
+├── run_arith.py
+├── report.pdf
+├── README.md
+\end{verbatim}
+
+\section*{Introduction}
+This report describes the design section, which describes the design decisions that I made and also include the class diagrams in UML format.
+
+
+\section*{Team Details}
+\begin{itemize}
+  \item Name: Petei Divya Poorna Chand
+  \item Roll Number: CS24BTECH11048
+\end{itemize}
+
+\section*{Design}
+The central idea of this project is to perform arithmetic operations on Integers and Floating-Point numbers without using libraries Bignumbers or any other built-in types
+\begin{itemize}
+    \item \texttt{AInteger}:Handles arbitrarily large integers, including sign management.
+    \item \texttt{AFloat}:  Supports floating-point arithmetic by separating integer and decimal parts and using \texttt{AInteger} for computations.
+\end{itemize}
+\section*{Design Decisions}
+
+This section explains the key design decisions made during the development of the Arbitrary Precision Arithmetic Library.
+
+\subsection*{1. Object-Oriented Approach}
+We adopted an object-oriented programming (OOP) paradigm to structure the library. Two main classes, \texttt{AInteger} and \texttt{AFloat}, were created to encapsulate the behavior and data of arbitrary-precision integers and floating-point numbers, respectively.
+
+\subsection*{2. String-Based Internal Representation}
+To support numbers of arbitrary size and precision, we chose to store numeric values as \texttt{String} objects. This allowed us to overcome the limitations of built-in Java data types like \texttt{int}, \texttt{long}, or \texttt{double}, and manually implement arithmetic logic character by character.
+
+\subsection*{3. Manual Arithmetic Implementation}
+All arithmetic operations (+, –, $\times$, $\div$) were implemented manually to simulate how operations are performed on paper:
+\begin{itemize}
+    \item Addition and subtraction follow digit-wise traversal with carry/borrow handling.
+    \item Multiplication uses column-based manual multiplication.
+    \item Division follows the long division method, including repeated subtraction and decimal handling.
+\end{itemize}
+This design ensures high precision and full control over the operations.
+
+\subsection*{4. Separation of Integer and Floating-Point Logic}
+The decision to use separate classes for \texttt{AInteger} and \texttt{AFloat} ensures clarity in handling integer-only logic versus floating-point arithmetic:
+\begin{itemize}
+    \item \texttt{AInteger} handles whole numbers and is optimized for base operations.
+    \item \texttt{AFloat} wraps two \texttt{AInteger} objects (for integer and fractional parts) and manages decimal point alignment.
+\end{itemize}
+
+\subsection*{5. Command Line Interface (CLI)}
+We provided a CLI through the \texttt{MyInfArith} class. This allows users to perform operations directly from the terminal, taking two number strings and an operator as input and printing the result to the console.
+
+\subsection*{6. Ant-Based Build System}
+To streamline compilation and packaging, we used Apache Ant to define a build process via \texttt{build.xml}. This makes the project easy to build and test with a single command.
+\texttt{aarithmetic.jar} file.
+
+\subsection*{7. Decoupling Testing and Execution}
+Testing and execution are decoupled using an external Python script. The script builds the project and executes the JAR file with user inputs, mimicking test case runs in a controlled environment.
+
+\subsection*{8. Precision Control}
+To limit performance while preserving accuracy, we designed the system to support up to 30 decimal digits of precision for floating-point operations. This level of precision is adequate for most use cases and balances speed with accuracy.
+
+
+
+\section*{implementation}
+\subsection*{AInteger class}
+The \texttt{AInteger} class handles arbitrary-precision integers. All numbers are represented as strings to avoid Java's built-in limits. Operations supported include:
+\begin{itemize}
+    \item \texttt{add(AInteger other)} – Adds two AIntegers using string-based digit-wise addition,Handling carry and sign.
+    \item \texttt{subtract(AInteger other)} – Performs subtraction, handling borrowing and sign.
+    \item \texttt{multiply(AInteger other)} – Repeated addition of one number using AInteger.add(Other).
+    \item \texttt{divide(AInteger other)} – Repeated subtraction of one number from other using AInteger.subtract(other) and counts repetitions
+\end{itemize}
+
+\subsection*{AFloat Class}
+The \texttt{AFloat} class handles floating-point numbers using \texttt{AInteger} for the integer parts. It supports:
+\begin{itemize}
+    \item stores index of decimal point and makes floating point numbers into integers by removing decimal points
+    \item uses AInteger for operations and add the decimal point at required place based on operation
+    \item Manual multiplication and division with precision up to 30 decimal digits.
+    \item sign handling
+\end{itemize}
+
+\section*{Command-Line Interface:MyInfArith Class}
+This class acts as the main interface for users. It parses command-line arguments and implements the appropriate arithmetic operations.
+\subsection*{Functionality}
+\begin{itemize}
+    \item Accepts input in the format: \texttt{java MyInfArith type operation num1 num2}
+    \item Determines whether the operands are integers or floating-point based on the presence of a decimal point.
+    \item Calls the corresponding method from \texttt{AInteger} or \texttt{AFloat} for the requested operation.
+    \item Outputs the result.
+\end{itemize}
+\section*{Creating a jar file using ant}
+I used Apache Ant, a Java-based build automation tool, to compile our source code and package it into a JAR file named \texttt{aarithmetic.jar}. This approach allows for reproducible builds and eliminates manual compilation and packaging.
+\subsection*{Buildfile : build.xml}
+    The build configuration is defined in a file named \texttt{build.xml}. This file specifies the project structure, compilation target, and JAR creation logic.
+\subsection*{How to Build}
+To build and generate the JAR file, simply run:
+\begin{verbatim}
+ant jar
+\end{verbatim}
+in terminal This will:
+\begin{itemize}
+    \item Compile all Java files under \texttt{src/arbitraryarithmetic/}
+    \item Place compiled \texttt{.class} files into \texttt{target/}
+    \item Create a JAR file \texttt{aarithmetic.jar} with \texttt{MyInfArith} as the main class
+\end{itemize}
+\subsection*{Advantages}
+Using Ant simplifies the build process by:
+\begin{itemize}
+    \item Automating compilation and packaging
+    \item Ensuring consistent builds
+    \item Making the project more portable and easier to test
+\end{itemize}
+
+\section*{python code to run the main program}
+To reduce difficulty in the the development and execution process, we created a Python script that automates compiling the Java source files and running the resulting executable JAR file. This script significantly reduces manual effort and ensures a consistent build environment for testing and demonstration purposes.
+\subsection*{Functionality}
+The Python script performs the following actions:
+\begin{enumerate}
+    \item It compiles all the Java files in the \texttt{src/arbitraryarithmetic/} directory using the \texttt{javac} compiler.
+    \item It packages the compiled \texttt{.class} files into a JAR named \texttt{aarithmetic.jar}, setting \texttt{MyInfArith} as the main class.
+    \item It executes the JAR file with user-provided arguments (  \texttt{type},\texttt{operator},\texttt{num1}, \texttt{num2}) and prints the output.
+\end{enumerate}
+\subsection*{Usage}
+\textbf{Command-line format:}
+\begin{verbatim}
+python3 run_arithmetic.py <type> <operator> <num1> <num2>
+\end{verbatim}
+
+\section*{Class Diagram (UML)}
+
+\begin{center}
+\begin{tikzpicture}
+  \umlclass[x=-10, y=0]{AInteger}{
+    - value : String
+  }{
+    + AInteger() \\
+    + AInteger(value : String) \\
+    + copy(other : AInteger) : AInteger \\
+    + parse(s : String) : AFloat\\
+    + toString() : String \\
+    + add(other : AInteger) : AInteger \\
+    + subtract(other : AInteger) : AInteger \\
+    + multiply(other : AInteger) : AInteger \\
+    + divide(other : AInteger) : AInteger \\
+    + compare(String a,String b) : int
+   \\
+  }
+
+  \umlclass[x=0, y=0]{AFloat}{
+    - value : String
+  }{
+    + AFloat() \\
+    + AFloat(value : String) \\
+    + copy(other : AFloat) : AFloat \\
+    + parse(s : String) : AFloat\\
+    + toString() : String \\
+    + add(other : AFloat) : AFloat \\
+    + subtract(other : AFloat) : AFloat \\
+    + multiply(other : AFloat) : AFloat \\
+    + divide(other : AFloat) : AFloat \\
+    + compare(String a,String b) : int
+    }
+    \uml{AFloat}{AInteger}
+\end{tikzpicture}
+\end{center}
+\subsection*{Limitations}
+
+\begin{enumerate}
+    \item \textbf{Manual Long Division is Time-Consuming:} \\
+    The \texttt{divide} methods in both \texttt{AInteger} and \texttt{AFloat} use a manual, long-division-style approach implemented through string manipulation. As a result, the execution time increases significantly for large input values.
+
+    \item \textbf{Fixed Precision of 30 Decimal Digits:} \\
+    The \texttt{AFloat} class supports up to 30 digits after the decimal point. Any computation requiring higher precision will be truncated or rounded beyond this limit.
+\end{enumerate}
+
+
+\end{document}
