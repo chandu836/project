@@ -3,7 +3,7 @@
  This project implements arithmetic operations on  **infinite/arbitrary-precision arithmetic library** in Java using Object-Oriented Programming without any loss of precision.
 
 ---
-## Package Structure
+## Package Structure()
 ```
     project/
 ├── src/
